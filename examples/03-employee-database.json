@@ -1,0 +1,82 @@
+{
+  "file_name": "employee_database.xlsx",
+  "sheets": [
+    {
+      "name": "Employees",
+      "columns": [
+        {
+          "header": "Employee ID",
+          "key": "id",
+          "width": 12
+        },
+        {
+          "header": "Full Name",
+          "key": "name",
+          "width": 25
+        },
+        {
+          "header": "Department",
+          "key": "department",
+          "width": 20
+        },
+        {
+          "header": "Email",
+          "key": "email",
+          "width": 30
+        },
+        {
+          "header": "Salary",
+          "key": "salary",
+          "width": 18,
+          "type": "currency",
+          "format": "#,##0₫"
+        },
+        {
+          "header": "Join Date",
+          "key": "join_date",
+          "width": 15,
+          "type": "date",
+          "format": "dd/mm/yyyy"
+        },
+        {
+          "header": "Status",
+          "key": "status",
+          "width": 12
+        }
+      ],
+      "data": [
+        {
+          "id": "EMP001",
+          "name": "Nguyen Van A",
+          "department": "IT",
+          "email": "nva@company.com",
+          "salary": 25000000,
+          "join_date": "2020-01-15",
+          "status": "Active"
+        },
+        {
+          "id": "EMP002",
+          "name": "Tran Thi B",
+          "department": "HR",
+          "email": "ttb@company.com",
+          "salary": 18000000,
+          "join_date": "2021-03-20",
+          "status": "Active"
+        },
+        {
+          "id": "EMP003",
+          "name": "Le Van C",
+          "department": "Finance",
+          "email": "lvc@company.com",
+          "salary": 22000000,
+          "join_date": "2019-07-10",
+          "status": "Active"
+        }
+      ],
+      "formatting": {
+        "freeze_panes": "A2",
+        "auto_filter": true
+      }
+    }
+  ]
+}
