@@ -1,0 +1,90 @@
+{
+  "file_name": "financial_report_q4_2024.xlsx",
+  "metadata": {
+    "title": "Q4 2024 Financial Report",
+    "author": "Finance Department",
+    "company": "Tech Corp"
+  },
+  "sheets": [
+    {
+      "name": "Income Statement",
+      "layout": "report",
+      "metadata": {
+        "title": "Income Statement - Q4 2024"
+      },
+      "columns": [
+        {
+          "header": "Category",
+          "key": "category",
+          "width": 30,
+          "style": {
+            "font": {"bold": true}
+          }
+        },
+        {
+          "header": "Q3 2024",
+          "key": "q3",
+          "width": 18,
+          "type": "currency",
+          "format": "#,##0₫"
+        },
+        {
+          "header": "Q4 2024",
+          "key": "q4",
+          "width": 18,
+          "type": "currency",
+          "format": "#,##0₫"
+        },
+        {
+          "header": "Change",
+          "key": "change",
+          "width": 15,
+          "type": "percentage",
+          "format": "0.00%"
+        }
+      ],
+      "data": [
+        {"category": "Revenue", "q3": 5000000000, "q4": 6000000000, "change": 0.2},
+        {"category": "Cost of Goods Sold", "q3": 3000000000, "q4": 3500000000, "change": 0.167},
+        {"category": "Gross Profit", "q3": 2000000000, "q4": 2500000000, "change": 0.25},
+        {"category": "Operating Expenses", "q3": 800000000, "q4": 900000000, "change": 0.125},
+        {"category": "Net Income", "q3": 1200000000, "q4": 1600000000, "change": 0.333}
+      ],
+      "formatting": {
+        "freeze_panes": "A2",
+        "conditional_formatting": [
+          {
+            "range": "D2:D100",
+            "type": "cellIs",
+            "operator": "greaterThan",
+            "formulae": [0],
+            "style": {
+              "fill": {
+                "type": "pattern",
+                "pattern": "solid",
+                "fgColor": {"argb": "FF90EE90"}
+              }
+            }
+          },
+          {
+            "range": "D2:D100",
+            "type": "cellIs",
+            "operator": "lessThan",
+            "formulae": [0],
+            "style": {
+              "fill": {
+                "type": "pattern",
+                "pattern": "solid",
+                "fgColor": {"argb": "FFFF6B6B"}
+              }
+            }
+          }
+        ],
+        "totals_row": {
+          "q3": "=SUM(B2:B6)",
+          "q4": "=SUM(C2:C6)"
+        }
+      }
+    }
+  ]
+}

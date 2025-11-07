@@ -1,0 +1,42 @@
+{
+  "name": "@your-org/excel-mcp-server",
+  "version": "1.0.0",
+  "description": "Dynamic Excel file generation server using Model Context Protocol (MCP)",
+  "type": "module",
+  "main": "build/index.js",
+  "bin": {
+    "excel-mcp-server": "./build/index.js"
+  },
+  "scripts": {
+    "build": "tsc && chmod +x build/index.js",
+    "dev": "tsx watch src/index.ts",
+    "start": "node build/index.js",
+    "test": "echo \"Tests to be implemented\" && exit 0",
+    "lint": "echo \"Linting to be configured\" && exit 0"
+  },
+  "keywords": [
+    "mcp",
+    "excel",
+    "exceljs",
+    "model-context-protocol",
+    "ai",
+    "llm"
+  ],
+  "author": "AI Assistant",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "exceljs": "^4.4.0",
+    "aws-sdk": "^2.1691.0",
+    "zod": "^3.22.4",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.3",
+    "tsx": "^4.7.0",
+    "eslint": "^8.56.0",
+    "@typescript-eslint/eslint-plugin": "^6.17.0",
+    "@typescript-eslint/parser": "^6.17.0"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "file_name": "simple_table.xlsx",
+  "sheets": [
+    {
+      "name": "Products",
+      "layout": "table",
+      "columns": [
+        {
+          "header": "Product Name",
+          "key": "name",
+          "width": 30
+        },
+        {
+          "header": "Price",
+          "key": "price",
+          "width": 15,
+          "type": "currency",
+          "format": "#,##0₫"
+        },
+        {
+          "header": "Stock",
+          "key": "stock",
+          "width": 12,
+          "type": "number"
+        }
+      ],
+      "data": [
+        {"name": "iPhone 15 Pro", "price": 30000000, "stock": 50},
+        {"name": "Samsung S24", "price": 25000000, "stock": 35},
+        {"name": "MacBook Pro", "price": 50000000, "stock": 20}
+      ],
+      "formatting": {
+        "freeze_panes": "A2",
+        "auto_filter": true
+      }
+    }
+  ]
+}

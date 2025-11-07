@@ -1,0 +1,69 @@
+{
+  "file_name": "comprehensive_report.xlsx",
+  "metadata": {
+    "title": "Comprehensive Business Report",
+    "author": "Analytics Team",
+    "description": "Multi-sheet report with summary and details"
+  },
+  "sheets": [
+    {
+      "name": "Summary",
+      "layout": "report",
+      "metadata": {
+        "title": "Executive Summary"
+      },
+      "columns": [
+        {"header": "Metric", "key": "metric", "width": 30},
+        {"header": "Value", "key": "value", "width": 20, "type": "number", "format": "#,##0"}
+      ],
+      "data": [
+        {"metric": "Total Revenue", "value": 15000000000},
+        {"metric": "Total Orders", "value": 5000},
+        {"metric": "Active Customers", "value": 2500},
+        {"metric": "Average Order Value", "value": 3000000}
+      ],
+      "formatting": {
+        "merged_cells": ["A1:B1"]
+      }
+    },
+    {
+      "name": "Sales Details",
+      "columns": [
+        {"header": "Date", "key": "date", "width": 12, "type": "date"},
+        {"header": "Product", "key": "product", "width": 30},
+        {"header": "Quantity", "key": "quantity", "width": 12, "type": "number"},
+        {"header": "Unit Price", "key": "unit_price", "width": 15, "type": "currency"},
+        {"header": "Total", "key": "total", "width": 18, "type": "currency"}
+      ],
+      "data": [
+        {"date": "2024-11-01", "product": "Product A", "quantity": 10, "unit_price": 500000, "total": 5000000},
+        {"date": "2024-11-02", "product": "Product B", "quantity": 5, "unit_price": 800000, "total": 4000000}
+      ],
+      "formatting": {
+        "freeze_panes": "A2",
+        "auto_filter": true,
+        "totals_row": {
+          "quantity": "=SUM(C2:C1000)",
+          "total": "=SUM(E2:E1000)"
+        }
+      }
+    },
+    {
+      "name": "Customer List",
+      "columns": [
+        {"header": "Customer ID", "key": "id", "width": 15},
+        {"header": "Name", "key": "name", "width": 25},
+        {"header": "City", "key": "city", "width": 20},
+        {"header": "Total Purchases", "key": "purchases", "width": 18, "type": "currency"}
+      ],
+      "data": [
+        {"id": "CUST001", "name": "Company A", "city": "Hanoi", "purchases": 50000000},
+        {"id": "CUST002", "name": "Company B", "city": "Ho Chi Minh", "purchases": 75000000}
+      ],
+      "formatting": {
+        "freeze_panes": "A2",
+        "auto_filter": true
+      }
+    }
+  ]
+}
