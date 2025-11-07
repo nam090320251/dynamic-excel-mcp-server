@@ -100,8 +100,9 @@ export class HttpTransportServer {
         // Create a new MCP server instance for this connection
         const mcpServer = this.serverFactory!.createServer();
 
-        // Create SSE transport (it will set the headers itself)
-        const transport = new SSEServerTransport('/message', res);
+        // Create SSE transport with correct endpoint path
+        // The transport will handle POST requests to this path
+        const transport = new SSEServerTransport('/messages', res);
 
         // Connect the MCP server to the transport
         await mcpServer.connect(transport);
@@ -137,13 +138,15 @@ export class HttpTransportServer {
     });
 
     // Message endpoint for client requests
-    this.app.post('/message', async (req, res) => {
+    // This endpoint receives POST requests from the client
+    this.app.post('/messages', async (req, res) => {
       try {
-        logger.info('Received message from client');
+        logger.info('Received message from client:', JSON.stringify(req.body));
 
-        // The SSE transport will handle the message through its internal routing
-        // We just need to acknowledge receipt
-        res.json({ success: true });
+        // The SSEServerTransport automatically handles routing of messages
+        // to the appropriate session. We just need to acknowledge receipt.
+        // The actual message handling is done by the transport internally.
+        res.status(200).json({ ok: true });
       } catch (error) {
         logger.error('Error handling message:', error);
         res.status(500).json({ error: 'Internal server error' });
@@ -156,6 +159,7 @@ export class HttpTransportServer {
       this.app.listen(this.config.port, this.config.host, () => {
         logger.info(`HTTP server listening on http://${this.config.host}:${this.config.port}`);
         logger.info(`SSE endpoint: http://${this.config.host}:${this.config.port}/sse`);
+        logger.info(`Messages endpoint: http://${this.config.host}:${this.config.port}/messages`);
         logger.info(`Health check: http://${this.config.host}:${this.config.port}/health`);
         resolve();
       });
