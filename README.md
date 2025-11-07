@@ -5,6 +5,8 @@ Dynamic Excel file generation server using Model Context Protocol (MCP). This se
 ## 🚀 Features
 
 - ✅ Generate Excel files from JSON schemas
+- ✅ **Dual transport modes**: Local (stdio) and Remote (HTTP/SSE)
+- ✅ **Deploy anywhere**: VPS, Cloud (AWS, GCP, Heroku), Docker
 - ✅ Multiple sheets support
 - ✅ Advanced formatting (styling, borders, colors)
 - ✅ Data validation and conditional formatting
@@ -15,6 +17,8 @@ Dynamic Excel file generation server using Model Context Protocol (MCP). This se
 - ✅ Presigned URLs for secure downloads
 - ✅ Freeze panes, auto-filter
 - ✅ Merged cells and row grouping
+- ✅ API key authentication
+- ✅ CORS support for web clients
 
 ## 📦 Installation
 
@@ -27,20 +31,34 @@ npm run build
 
 Create a `.env` file (copy from `.env.example`):
 
+**For Local (Stdio) Mode:**
 ```env
-STORAGE_TYPE=local  # or 's3' for AWS S3
+TRANSPORT_MODE=stdio  # Local MCP client mode
+STORAGE_TYPE=local
+DEV_STORAGE_PATH=./temp-files
+LOG_LEVEL=info
+```
+
+**For Remote (HTTP/SSE) Mode:**
+```env
+TRANSPORT_MODE=http  # Remote server mode
+HTTP_PORT=3000
+HTTP_HOST=0.0.0.0
+ALLOWED_ORIGINS=*  # Or specific domains: https://app.example.com
+API_KEY=your-secret-api-key  # Optional
+
+STORAGE_TYPE=s3  # or 'local'
 AWS_ACCESS_KEY_ID=your_key
 AWS_SECRET_ACCESS_KEY=your_secret
 AWS_REGION=ap-southeast-1
 S3_BUCKET=your-bucket
 PRESIGNED_URL_EXPIRY=3600
 LOG_LEVEL=info
-DEV_STORAGE_PATH=./temp-files
 ```
 
 ## 🔧 Usage
 
-### As MCP Server
+### 🖥️ Local Mode (Stdio) - For Claude Desktop
 
 Add to your Claude Desktop or MCP client configuration:
 
@@ -77,6 +95,62 @@ Add to your Claude Desktop or MCP client configuration:
   }
 }
 ```
+
+### 🌐 Remote Mode (HTTP/SSE) - For Web Apps & Remote Access
+
+**Start the server:**
+```bash
+# Using environment variable
+TRANSPORT_MODE=http npm start
+
+# Or using npm script
+npm run start:http
+
+# Or with .env file configured for http mode
+npm start
+```
+
+**Server endpoints:**
+```
+http://localhost:3000/health   - Health check
+http://localhost:3000/info     - Server information
+http://localhost:3000/sse      - SSE endpoint for MCP clients
+```
+
+**Example client usage:**
+
+See `examples/client-example.ts` for a complete TypeScript client example using the MCP SDK.
+
+```typescript
+import { Client } from '@modelcontextprotocol/sdk/client/index.js';
+import { SSEClientTransport } from '@modelcontextprotocol/sdk/client/sse.js';
+
+const transport = new SSEClientTransport(
+  new URL('http://localhost:3000/sse'),
+  {
+    headers: { 'X-API-Key': 'your-api-key' } // If API_KEY is set
+  }
+);
+
+const client = new Client({
+  name: 'excel-client',
+  version: '1.0.0',
+}, { capabilities: {} });
+
+await client.connect(transport);
+const result = await client.callTool({
+  name: 'generate_excel',
+  arguments: excelSchema
+});
+```
+
+**Deployment options:**
+- 🐳 **Docker**: See `DEPLOYMENT.md` for Dockerfile and docker-compose examples
+- ☁️ **Cloud**: Deploy to AWS, GCP, Heroku, etc.
+- 🖧 **VPS**: Use PM2, systemd, or other process managers
+- 🔒 **Production**: Enable API key auth, configure CORS, use HTTPS
+
+📚 **Full deployment guide**: See [DEPLOYMENT.md](./DEPLOYMENT.md)
 
 ### Tool: generate_excel
 
