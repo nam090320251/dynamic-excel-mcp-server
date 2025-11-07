@@ -17,6 +17,7 @@ import { S3Storage } from './storage/s3-storage.js';
 import { LocalStorage } from './storage/local-storage.js';
 import { logger } from './utils/logger.js';
 import { ExcelConfig } from './types/schema.js';
+import { HttpTransportServer } from './transports/http-server.js';
 
 // Load environment variables
 config();
@@ -223,13 +224,46 @@ function selectGenerator(config: ExcelConfig): BasicGenerator | ReportGenerator 
   return new BasicGenerator();
 }
 
-// Start server
+// Start server with appropriate transport
 async function main() {
-  const transport = new StdioServerTransport();
-  await server.connect(transport);
+  const transportMode = process.env.TRANSPORT_MODE || 'stdio';
 
-  logger.info('Excel MCP Server started');
-  logger.info(`Storage type: ${storageType}`);
+  if (transportMode === 'http') {
+    // HTTP/SSE mode for remote access
+    const port = parseInt(process.env.HTTP_PORT || '3000');
+    const host = process.env.HTTP_HOST || '0.0.0.0';
+    const allowedOrigins = process.env.ALLOWED_ORIGINS
+      ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim())
+      : ['*'];
+    const apiKey = process.env.API_KEY;
+
+    const httpServer = new HttpTransportServer({
+      port,
+      host,
+      allowedOrigins,
+      apiKey,
+    });
+
+    // Setup MCP endpoint
+    httpServer.setupMcpEndpoint(server);
+
+    // Start HTTP server
+    await httpServer.start();
+
+    logger.info('Excel MCP Server started in HTTP/SSE mode');
+    logger.info(`Storage type: ${storageType}`);
+    logger.info(`Allowed origins: ${allowedOrigins.join(', ')}`);
+    if (apiKey) {
+      logger.info('API key authentication enabled');
+    }
+  } else {
+    // Stdio mode for local MCP client
+    const transport = new StdioServerTransport();
+    await server.connect(transport);
+
+    logger.info('Excel MCP Server started in stdio mode');
+    logger.info(`Storage type: ${storageType}`);
+  }
 }
 
 main().catch((error) => {
