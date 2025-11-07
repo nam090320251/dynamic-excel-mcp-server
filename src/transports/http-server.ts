@@ -3,6 +3,10 @@ import cors from 'cors';
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js';
 import { logger } from '../utils/logger.js';
+import {
+  CallToolRequestSchema,
+  ListToolsRequestSchema,
+} from '@modelcontextprotocol/sdk/types.js';
 
 export interface HttpServerConfig {
   port: number;
@@ -11,9 +15,14 @@ export interface HttpServerConfig {
   apiKey?: string;
 }
 
+export interface McpServerFactory {
+  createServer: () => Server;
+}
+
 export class HttpTransportServer {
   private app: express.Application;
   private config: HttpServerConfig;
+  private serverFactory?: McpServerFactory;
 
   constructor(config: HttpServerConfig) {
     this.config = config;
@@ -44,23 +53,12 @@ export class HttpTransportServer {
     this.app.use(cors(corsOptions));
     this.app.use(express.json({ limit: '50mb' }));
 
-    // API key authentication middleware
-    if (this.config.apiKey) {
-      this.app.use((req, res, next) => {
-        const apiKey = req.headers['x-api-key'] || req.query.apiKey;
-        if (apiKey !== this.config.apiKey) {
-          return res.status(401).json({ error: 'Unauthorized: Invalid API key' });
-        }
-        next();
-      });
-    }
-
-    // Health check endpoint
+    // Health check endpoint (no auth required)
     this.app.get('/health', (req, res) => {
       res.json({ status: 'ok', timestamp: new Date().toISOString() });
     });
 
-    // Info endpoint
+    // Info endpoint (no auth required)
     this.app.get('/info', (req, res) => {
       res.json({
         name: 'Excel MCP Server',
@@ -73,35 +71,78 @@ export class HttpTransportServer {
         },
       });
     });
+
+    // API key authentication middleware (applied after public endpoints)
+    if (this.config.apiKey) {
+      this.app.use((req, res, next) => {
+        // Skip auth for health and info endpoints
+        if (req.path === '/health' || req.path === '/info') {
+          return next();
+        }
+
+        const apiKey = req.headers['x-api-key'] || req.query.apiKey;
+        if (apiKey !== this.config.apiKey) {
+          return res.status(401).json({ error: 'Unauthorized: Invalid API key' });
+        }
+        next();
+      });
+    }
   }
 
-  setupMcpEndpoint(mcpServer: Server) {
+  setupMcpEndpoint(serverFactory: McpServerFactory) {
+    this.serverFactory = serverFactory;
+
     // SSE endpoint for MCP communication
     this.app.get('/sse', async (req, res) => {
-      logger.info('SSE client connected');
+      logger.info('New SSE client connecting...');
 
-      // Set headers for SSE
-      res.setHeader('Content-Type', 'text/event-stream');
-      res.setHeader('Cache-Control', 'no-cache');
-      res.setHeader('Connection', 'keep-alive');
+      try {
+        // Create a new MCP server instance for this connection
+        const mcpServer = this.serverFactory!.createServer();
 
-      // Create SSE transport
-      const transport = new SSEServerTransport('/message', res);
+        // Create SSE transport (it will set the headers itself)
+        const transport = new SSEServerTransport('/message', res);
 
-      // Connect MCP server to this transport
-      await mcpServer.connect(transport);
+        // Connect the MCP server to the transport
+        await mcpServer.connect(transport);
+        logger.info('SSE connection established and MCP server connected');
 
-      // Handle client disconnect
-      req.on('close', () => {
-        logger.info('SSE client disconnected');
-        transport.close();
-      });
+        // Handle client disconnect
+        req.on('close', () => {
+          logger.info('SSE client disconnected');
+          transport.close().catch((err) => {
+            logger.error('Error closing transport:', err);
+          });
+        });
+
+        // Keep connection alive
+        const keepAlive = setInterval(() => {
+          if (res.writableEnded) {
+            clearInterval(keepAlive);
+            return;
+          }
+          res.write(': keep-alive\n\n');
+        }, 30000);
+
+        req.on('close', () => {
+          clearInterval(keepAlive);
+        });
+
+      } catch (error) {
+        logger.error('Error in SSE endpoint:', error);
+        if (!res.headersSent) {
+          res.status(500).json({ error: 'Failed to establish SSE connection' });
+        }
+      }
     });
 
     // Message endpoint for client requests
     this.app.post('/message', async (req, res) => {
       try {
-        // This will be handled by the SSE transport
+        logger.info('Received message from client');
+
+        // The SSE transport will handle the message through its internal routing
+        // We just need to acknowledge receipt
         res.json({ success: true });
       } catch (error) {
         logger.error('Error handling message:', error);
