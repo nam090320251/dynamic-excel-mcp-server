@@ -2,6 +2,10 @@
 
 Dynamic Excel file generation server using Model Context Protocol (MCP). This server allows LLMs to automatically create Excel files with any structure through dynamic JSON schemas.
 
+<a href="https://glama.ai/mcp/servers/@nam090320251/dynamic-excel-mcp-server">
+  <img width="380" height="200" src="https://glama.ai/mcp/servers/@nam090320251/dynamic-excel-mcp-server/badge" alt="Dynamic Excel Server MCP server" />
+</a>
+
 ## 🚀 Features
 
 - ✅ Generate Excel files from JSON schemas
